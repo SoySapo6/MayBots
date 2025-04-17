@@ -5,10 +5,10 @@ verde='\e[1;32m'
 verde_oscuro='\e[0;32m'
 reset='\e[0m'
 
-# Música de fondo en bucle
+# Reproducir música en bucle sin mostrar nada
 mpv --really-quiet --loop https://files.catbox.moe/tmhmm8.mp3 &>/dev/null &
 
-# Cabecera
+# Mostrar banner
 banner() {
   clear
   echo -e "${verde}"
@@ -17,17 +17,19 @@ banner() {
   echo -e "${verde}Contacto: +51 921 826 291${reset}\n"
 }
 
+# Mostrar lista
 listar_bots() {
   echo -e "${verde}Bots disponibles:"
   echo "  - Perrito no Yūsha"
   echo "  - MaycolAI"
-  echo "  - GataBotMD"
+  echo -e "  - GataBotMD"
   echo -e "  - LoliBotMD${reset}"
 }
 
+# Buscar bot
 buscar_bot() {
-  query=$(echo "$1" | tr '[:upper:]' '[:lower:]')
-  case $query in
+  nombre=$(echo "$1" | tr '[:upper:]' '[:lower:]')
+  case "$nombre" in
     *perrito*|*yusha*) echo "Encontrado: Perrito no Yūsha";;
     *maycol*) echo "Encontrado: MaycolAI";;
     *gata*) echo "Encontrado: GataBotMD";;
@@ -36,11 +38,12 @@ buscar_bot() {
   esac
 }
 
+# Instalar bot
 instalar_bot() {
-  bot=$(echo "$1" | tr '[:upper:]' '[:lower:]')
-  echo -e "${verde}Descargando e instalando $1...${reset}"
+  nombre=$(echo "$1" | tr '[:upper:]' '[:lower:]')
+  echo -e "${verde}Descargando e instalando '$1'...${reset}"
   sleep 1
-  case $bot in
+  case "$nombre" in
     *perrito*|*yusha*)
       apt update -y && yes | apt upgrade && pkg install -y bash wget figlet
       wget -O - https://raw.githubusercontent.com/Ado926/Perrita-No-Yusha/main/IA.sh | bash;;
@@ -53,11 +56,11 @@ instalar_bot() {
     *loli*)
       apt update -y && yes | apt upgrade && pkg install -y bash wget mpv
       wget -O - https://raw.githubusercontent.com/elrebelde21/LoliBot-MD/master/install.sh | bash;;
-    *)
-      echo -e "${verde_oscuro}Bot '$1' no encontrado.${reset}";;
+    *) echo -e "${verde_oscuro}Bot '$1' no encontrado.${reset}";;
   esac
 }
 
+# Menú principal
 main_menu() {
   banner
   while true; do
@@ -68,39 +71,42 @@ main_menu() {
     echo "  maybots install <nombre>"
     echo "  salir"
     echo -ne "${reset}~$ "
-    read -r input
+    IFS= read -r input  # leer la línea completa incluso con espacios
 
-    # Saltar líneas vacías
+    # Ignorar líneas vacías
     [[ -z "$input" ]] && continue
 
     comando=$(echo "$input" | awk '{print $1}')
-    accion=$(echo "$input" | awk '{print $2}')
+    subcomando=$(echo "$input" | awk '{print $2}')
     argumento=$(echo "$input" | cut -d' ' -f3-)
 
-    if [[ "$input" == "salir" ]]; then
-      echo -e "${verde_oscuro}Saliendo...${reset}"
-      pkill mpv
-      break
-    elif [[ "$comando" == "maybots" ]]; then
-      case "$accion" in
-        list) listar_bots;;
-        search)
-          if [[ -z "$argumento" ]]; then
-            echo -e "${verde_oscuro}Especifica un bot para buscar.${reset}"
-          else
-            buscar_bot "$argumento"
-          fi;;
-        install)
-          if [[ -z "$argumento" ]]; then
-            echo -e "${verde_oscuro}Especifica un bot para instalar.${reset}"
-          else
-            instalar_bot "$argumento"
-          fi;;
-        *) echo -e "${verde_oscuro}Comando inválido. Usa list, search o install.${reset}";;
-      esac
-    else
-      echo -e "${verde_oscuro}Comando no reconocido.${reset}"
-    fi
+    case "$input" in
+      salir)
+        echo -e "${verde_oscuro}Saliendo...${reset}"
+        pkill mpv
+        break
+        ;;
+      maybots\ list)
+        listar_bots
+        ;;
+      maybots\ search\ *)
+        if [[ -z "$argumento" ]]; then
+          echo -e "${verde_oscuro}Especifica un nombre de bot.${reset}"
+        else
+          buscar_bot "$argumento"
+        fi
+        ;;
+      maybots\ install\ *)
+        if [[ -z "$argumento" ]]; then
+          echo -e "${verde_oscuro}Especifica un nombre de bot para instalar.${reset}"
+        else
+          instalar_bot "$argumento"
+        fi
+        ;;
+      *)
+        echo -e "${verde_oscuro}Comando inválido. Usa list, search o install.${reset}"
+        ;;
+    esac
   done
 }
 
