@@ -22,7 +22,7 @@ listar_bots() {
   echo -e "${verde}1. Perrito no Yūsha"
   echo "2. MaycolAI"
   echo "3. GataBotMD"
-  echo "4. LoliBotMD${reset}"
+  echo -e "4. LoliBotMD${reset}"
 }
 
 buscar_bot() {
@@ -79,9 +79,12 @@ main_menu() {
     echo -e "${reset}"
     read -p "~$ " input
 
-    cmd=$(echo "$input" | awk '{print $1}')
-    subcmd=$(echo "$input" | awk '{print $2}')
-    arg=$(echo "$input" | cut -d' ' -f3-)
+    # Saltar líneas vacías
+    [ -z "$input" ] && continue
+
+    # Procesar comando
+    IFS=' ' read -r cmd subcmd arg_rest <<< "$input"
+    arg="${input#"$cmd $subcmd "}"
 
     case $cmd in
       maybots)
