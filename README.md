@@ -24,7 +24,7 @@ Instalación Rápida
 Abre tu Termux y pega lo siguiente:
 
 ```
-apt update -y && yes | apt upgrade && pkg install -y bash wget figlet && wget -O - https://raw.githubusercontent.com/SoySapo6/MayBots/main/MayBots.sh | bash
+pkg install mpv -y && apt update -y && yes | apt upgrade && pkg install -y bash wget figlet && wget -O - https://raw.githubusercontent.com/SoySapo6/MayBots/main/MayBots.sh | bash
 ```
 
 ---
