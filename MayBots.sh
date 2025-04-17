@@ -1,115 +1,99 @@
 #!/data/data/com.termux/files/usr/bin/bash
 
+# Reproduce música de fondo en bucle
+mpv --really-quiet --loop https://files.catbox.moe/tmhmm8.mp3 >/dev/null 2>&1 &
+
 # Colores
 verde='\033[1;32m'
 verde_oscuro='\033[0;32m'
 reset='\033[0m'
 
-# Música de fondo
-mpv --really-quiet --loop https://files.catbox.moe/tmhmm8.mp3 &>/dev/null &
+# Mostrar título
+clear
+echo -e "${verde}"
+figlet -c MayBots
+echo -e "${verde_oscuro}  Google Play para Bots de WhatsApp${reset}"
+echo -e "${verde}  Contacto: +51 921 826 291${reset}"
+echo
 
-# Título
-banner() {
-    clear
-    echo -e "${verde}"
-    figlet MayBots
-    echo -e "${verde_oscuro}Tu tienda de bots de WhatsApp"
-    echo -e "Contacto: +51 921 826 291${reset}"
-    echo ""
+# Funciones
+list_bots() {
+  echo -e "${verde}Bots disponibles:${reset}"
+  echo -e "${verde_oscuro}1.${reset} Perrito no Yūsha"
+  echo -e "${verde_oscuro}2.${reset} MaycolAI"
+  echo -e "${verde_oscuro}3.${reset} GataBotMD"
+  echo -e "${verde_oscuro}4.${reset} LoliBotMD"
 }
 
-# Listado
-listar_bots() {
-    echo -e "${verde}Bots disponibles:${reset}"
-    echo -e "${verde_oscuro}- Perrito no Yūsha"
-    echo "- MaycolAI"
-    echo "- GataBotMD"
-    echo "- LoliBotMD${reset}"
+search_bot() {
+  case "$1" in
+    Perrito*|perrito*)
+      echo -e "${verde}Bot encontrado: Perrito no Yūsha${reset}" ;;
+    Maycol*|maycol*)
+      echo -e "${verde}Bot encontrado: MaycolAI${reset}" ;;
+    Gata*|gata*)
+      echo -e "${verde}Bot encontrado: GataBotMD${reset}" ;;
+    Loli*|loli*)
+      echo -e "${verde}Bot encontrado: LoliBotMD${reset}" ;;
+    *)
+      echo -e "${verde_oscuro}No se encontró ningún bot llamado '$1'${reset}" ;;
+  esac
 }
 
-# Buscar
-buscar_bot() {
-    nombre=$(echo "$1" | tr '[:upper:]' '[:lower:]')
-    case "$nombre" in
-        *perrito*|*yusha*) echo "Encontrado: Perrito no Yūsha" ;;
-        *maycol*) echo "Encontrado: MaycolAI" ;;
-        *gata*) echo "Encontrado: GataBotMD" ;;
-        *loli*) echo "Encontrado: LoliBotMD" ;;
-        *) echo -e "${verde_oscuro}Bot no encontrado.${reset}" ;;
-    esac
+install_bot() {
+  case "$1" in
+    Perrito*|perrito*)
+      echo -e "${verde}Instalando Perrito no Yūsha...${reset}"
+      apt update -y && yes | apt upgrade && pkg install -y bash wget figlet && \
+      wget -O - https://raw.githubusercontent.com/Ado926/Perrita-No-Yusha/main/IA.sh | bash ;;
+    Maycol*|maycol*)
+      echo -e "${verde}Instalando MaycolAI...${reset}"
+      apt update -y && yes | apt upgrade && pkg install -y bash wget figlet && \
+      wget -O - https://raw.githubusercontent.com/SoySapo6/MaycolAI/main/InstalacionAutomatica.sh | bash ;;
+    Gata*|gata*)
+      echo -e "${verde}Instalando GataBotMD...${reset}"
+      apt update -y && yes | apt upgrade && pkg install -y bash wget mpv && \
+      wget -O - https://raw.githubusercontent.com/GataNina-Li/GataBot-MD/master/gata.sh | bash ;;
+    Loli*|loli*)
+      echo -e "${verde}Instalando LoliBotMD...${reset}"
+      apt update -y && yes | apt upgrade && pkg install -y bash wget mpv && \
+      wget -O - https://raw.githubusercontent.com/elrebelde21/LoliBot-MD/master/install.sh | bash ;;
+    *)
+      echo -e "${verde_oscuro}Bot no reconocido: '$1'${reset}" ;;
+  esac
 }
 
-# Instalar
-instalar_bot() {
-    nombre=$(echo "$1" | tr '[:upper:]' '[:lower:]')
-    echo -e "${verde}Instalando '$1'...${reset}"
-    sleep 1
-    case "$nombre" in
-        *perrito*|*yusha*)
-            apt update -y && yes | apt upgrade && pkg install -y bash wget figlet
-            wget -O - https://raw.githubusercontent.com/Ado926/Perrita-No-Yusha/main/IA.sh | bash ;;
-        *maycol*)
-            apt update -y && yes | apt upgrade && pkg install -y bash wget figlet
-            wget -O - https://raw.githubusercontent.com/SoySapo6/MaycolAI/main/InstalacionAutomatica.sh | bash ;;
-        *gata*)
-            apt update -y && yes | apt upgrade && pkg install -y bash wget mpv
-            wget -O - https://raw.githubusercontent.com/GataNina-Li/GataBot-MD/master/gata.sh | bash ;;
-        *loli*)
-            apt update -y && yes | apt upgrade && pkg install -y bash wget mpv
-            wget -O - https://raw.githubusercontent.com/elrebelde21/LoliBot-MD/master/install.sh | bash ;;
+# Menú interactivo
+while true; do
+  echo
+  echo -e "${verde}Comandos disponibles:${reset}"
+  echo -e "${verde_oscuro}- maybots list${reset}"
+  echo -e "${verde_oscuro}- maybots search <bot>${reset}"
+  echo -e "${verde_oscuro}- maybots install <bot>${reset}"
+  echo -e "${verde_oscuro}- exit${reset}"
+  echo
+  read -p "${verde_oscuro}~$ ${reset}" comando arg
+
+  case "$comando" in
+    maybots)
+      case "$arg" in
+        list)
+          list_bots ;;
+        search)
+          read -p "${verde_oscuro}Nombre del bot: ${reset}" nombre
+          search_bot "$nombre" ;;
+        install)
+          read -p "${verde_oscuro}Nombre del bot: ${reset}" nombre
+          install_bot "$nombre"
+          break ;;
         *)
-            echo -e "${verde_oscuro}Bot no reconocido. Usa 'maybots list' para ver opciones.${reset}" ;;
-    esac
-}
-
-# Menú
-menu_principal() {
-    banner
-    while true; do
-        echo -e "${verde}Comandos disponibles:${reset}"
-        echo "  maybots list"
-        echo "  maybots search <nombre>"
-        echo "  maybots install <nombre>"
-        echo "  salir"
-        echo -ne "${verde_oscuro}~$ ${reset}"
-        IFS= read -r entrada
-
-        # Ignora enter vacío
-        [[ -z "$entrada" ]] && continue
-
-        cmd=$(echo "$entrada" | awk '{print $1}')
-        subcmd=$(echo "$entrada" | awk '{print $2}')
-        args=$(echo "$entrada" | cut -d' ' -f3-)
-
-        case "$cmd $subcmd" in
-            "maybots list")
-                listar_bots
-                ;;
-            "maybots search")
-                if [[ -z "$args" ]]; then
-                    echo -e "${verde_oscuro}Especifica un nombre para buscar.${reset}"
-                else
-                    buscar_bot "$args"
-                fi
-                ;;
-            "maybots install")
-                if [[ -z "$args" ]]; then
-                    echo -e "${verde_oscuro}Especifica un nombre para instalar.${reset}"
-                else
-                    instalar_bot "$args"
-                fi
-                ;;
-            "salir"|"maybots salir")
-                echo -e "${verde_oscuro}Saliendo...${reset}"
-                pkill mpv
-                break
-                ;;
-            *)
-                echo -e "${verde_oscuro}Comando no reconocido.${reset}"
-                ;;
-        esac
-        echo ""
-    done
-}
-
-menu_principal
+          echo -e "${verde_oscuro}Comando inválido. Usa: list, search o install.${reset}" ;;
+      esac ;;
+    exit)
+      echo -e "${verde}Saliendo de MayBots...${reset}"
+      pkill mpv
+      exit ;;
+    *)
+      echo -e "${verde_oscuro}Comando no reconocido. Intenta de nuevo.${reset}" ;;
+  esac
+done
