@@ -1,90 +1,118 @@
 #!/data/data/com.termux/files/usr/bin/bash
 
 # Colores
-verde='\033[1;32m'
-verde_oscuro='\033[0;32m'
-negro='\033[0;30m'
-reset='\033[0m'
+verde='\e[1;32m'
+verde_oscuro='\e[0;32m'
+reset='\e[0m'
 
-# Música de fondo
+# Música de fondo en bucle
 mpv --really-quiet --loop https://files.catbox.moe/tmhmm8.mp3 &>/dev/null &
-PID_MUSIC=$!
 
-# Título
-clear
-echo -e "${verde}"
-figlet -f big "MayBots"
-echo -e "${verde_oscuro}By SoyMaycol | Contacto: +51 921 826 291${reset}"
-echo
-
-# Bots disponibles
-declare -A bots
-bots["Perrito"]="apt update -y && yes | apt upgrade && pkg install -y bash wget figlet && wget -O - https://raw.githubusercontent.com/Ado926/Perrita-No-Yusha/main/IA.sh | bash"
-bots["MaycolAI"]="apt update -y && yes | apt upgrade && pkg install -y bash wget figlet && wget -O - https://raw.githubusercontent.com/SoySapo6/MaycolAI/main/InstalacionAutomatica.sh | bash"
-bots["GataBotMD"]="apt update -y && yes | apt upgrade && pkg install -y bash wget mpv && wget -O - https://raw.githubusercontent.com/GataNina-Li/GataBot-MD/master/gata.sh | bash"
-bots["LoliBotMD"]="apt update -y && yes | apt upgrade && pkg install -y bash wget mpv && wget -O - https://raw.githubusercontent.com/elrebelde21/LoliBot-MD/master/install.sh | bash"
-
-function show_menu() {
-    echo -e "${verde}Comandos disponibles:${reset}"
-    echo -e "${verde_oscuro}  maybots list${reset}           - Ver todos los bots"
-    echo -e "${verde_oscuro}  maybots search <nombre>${reset} - Buscar un bot"
-    echo -e "${verde_oscuro}  maybots install <nombre>${reset} - Instalar un bot"
-    echo
+# Cabecera
+banner() {
+  clear
+  echo -e "${verde}"
+  figlet -c MayBots
+  echo -e "${verde_oscuro}La Google Play de Bots de WhatsApp"
+  echo -e "${verde}Contacto: +51 921 826 291${reset}"
+  echo ""
 }
 
-function list_bots() {
-    echo -e "${verde}Bots disponibles:${reset}"
-    for name in "${!bots[@]}"; do
-        echo -e " - ${verde_oscuro}${name}${reset}"
-    done
+listar_bots() {
+  echo -e "${verde}1. Perrito no Yūsha"
+  echo "2. MaycolAI"
+  echo "3. GataBotMD"
+  echo "4. LoliBotMD${reset}"
 }
 
-function search_bot() {
-    if [[ -n "${bots[$1]}" ]]; then
-        echo -e "${verde}Bot encontrado: $1${reset}"
-    else
-        echo -e "${negro}Bot no encontrado: $1${reset}"
-    fi
+buscar_bot() {
+  local query=$(echo "$1" | tr '[:upper:]' '[:lower:]')
+  echo -e "${verde}Buscando bot: $1...${reset}"
+  case $query in
+    perrito*|no*yusha)
+      echo "Encontrado: Perrito no Yūsha";;
+    maycol*|ai)
+      echo "Encontrado: MaycolAI";;
+    gata*|md)
+      echo "Encontrado: GataBotMD";;
+    loli*|md)
+      echo "Encontrado: LoliBotMD";;
+    *)
+      echo -e "${verde_oscuro}No se encontró el bot '$1'.${reset}";;
+  esac
 }
 
-function install_bot() {
-    local botname="$1"
-    if [[ -n "${bots[$botname]}" ]]; then
-        echo -e "${verde}Instalando $botname...${reset}"
-        sleep 1
-        echo -e "${verde_oscuro}Procesando instalación...${reset}"
-        sleep 1
-        bash -c "${bots[$botname]}"
-        echo -e "${verde}$botname instalado correctamente.${reset}"
-    else
-        echo -e "${negro}Bot '$botname' no existe.${reset}"
-    fi
+instalar_bot() {
+  local bot=$(echo "$1" | tr '[:upper:]' '[:lower:]')
+  case $bot in
+    perrito*|no*yusha)
+      echo -e "${verde}Instalando Perrito no Yūsha...${reset}"
+      apt update -y && yes | apt upgrade && pkg install -y bash wget figlet
+      wget -O - https://raw.githubusercontent.com/Ado926/Perrita-No-Yusha/main/IA.sh | bash;;
+    maycol*|ai)
+      echo -e "${verde}Instalando MaycolAI...${reset}"
+      apt update -y && yes | apt upgrade && pkg install -y bash wget figlet
+      wget -O - https://raw.githubusercontent.com/SoySapo6/MaycolAI/main/InstalacionAutomatica.sh | bash;;
+    gata*|md)
+      echo -e "${verde}Instalando GataBotMD...${reset}"
+      apt update -y && yes | apt upgrade && pkg install -y bash wget mpv
+      wget -O - https://raw.githubusercontent.com/GataNina-Li/GataBot-MD/master/gata.sh | bash;;
+    loli*|md)
+      echo -e "${verde}Instalando LoliBotMD...${reset}"
+      apt update -y && yes | apt upgrade && pkg install -y bash wget mpv
+      wget -O - https://raw.githubusercontent.com/elrebelde21/LoliBot-MD/master/install.sh | bash;;
+    *)
+      echo -e "${verde_oscuro}Bot '$1' no encontrado.${reset}";;
+  esac
 }
 
-function handle_command() {
-    case "$1" in
-        list)
-            list_bots
-            ;;
-        search)
-            search_bot "$2"
-            ;;
-        install)
-            install_bot "$2"
-            ;;
-        *)
-            echo -e "${negro}Comando no válido.${reset}"
-            show_menu
-            ;;
+# Menú principal
+main_menu() {
+  banner
+  while true; do
+    echo -e "${verde}"
+    echo "Comandos disponibles:"
+    echo "  maybots list"
+    echo "  maybots search <nombre>"
+    echo "  maybots install <nombre>"
+    echo "  salir"
+    echo -e "${reset}"
+    read -p "~$ " input
+
+    cmd=$(echo "$input" | awk '{print $1}')
+    subcmd=$(echo "$input" | awk '{print $2}')
+    arg=$(echo "$input" | cut -d' ' -f3-)
+
+    case $cmd in
+      maybots)
+        case $subcmd in
+          list)
+            listar_bots;;
+          search)
+            if [ -z "$arg" ]; then
+              read -p "Nombre del bot: " nombre
+              buscar_bot "$nombre"
+            else
+              buscar_bot "$arg"
+            fi;;
+          install)
+            if [ -z "$arg" ]; then
+              read -p "Nombre del bot a instalar: " nombre
+              instalar_bot "$nombre"
+            else
+              instalar_bot "$arg"
+            fi;;
+          *)
+            echo -e "${verde_oscuro}Comando inválido. Usa list, search o install.${reset}";;
+        esac;;
+      salir)
+        echo -e "${verde_oscuro}Saliendo...${reset}"
+        pkill mpv
+        exit 0;;
+      *)
+        echo -e "${verde_oscuro}Comando no reconocido.${reset}";;
     esac
+  done
 }
 
-# Entrada del usuario
-if [[ $# -eq 0 ]]; then
-    show_menu
-else
-    handle_command "$1" "$2"
-fi
-
-# Detener música al final
-kill $PID_MUSIC &>/dev/null
+main_menu
